@@ -83,10 +83,8 @@ class SuperWorker(threading.Thread):
 
 
     def _retrieve_race_results(self):
-        
-        with open(self.file_path, mode='w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(self.header)
+    
+        df = pd.DataFrame(columns=self.header)
 
         programme = get_programme(self.programme_date)
         reunions = programme["programme"]["reunions"]
@@ -100,11 +98,11 @@ class SuperWorker(threading.Thread):
                     self.programme_date,
                     reunion_num,
                     course_num,
-                    resultat
+                    [item for sublist in resultat for item in sublist]
                 ]
-                with open(self.file_path, mode='a', newline='', encoding='utf-8') as file:
-                    writer = csv.writer(file)
-                    writer.writerows(data)
+                df = pd.concat([pd.DataFrame([data], columns=df.columns), df], ignore_index=True)
+
+        df.to_csv(self.file_path, index=False)
 
 
 
@@ -134,3 +132,4 @@ class SuperWorker(threading.Thread):
         if all_data:
             merged_df = pd.concat(all_data, ignore_index=True)
             merged_df.to_csv(merged_file_path, index=False)
+            
