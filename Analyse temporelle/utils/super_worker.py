@@ -20,6 +20,7 @@ class SuperWorker(threading.Thread):
         self.programme_date = programme_date
         self.workers = []
         self.followed_races = []
+        self.status = "running"
 
         self.file_path = os.path.join(path, f"{self.programme_date}_results.csv")
         self.header = [
@@ -31,7 +32,7 @@ class SuperWorker(threading.Thread):
 
     def run(self):
 
-        while True:
+        while self.status == "running":
 
             info(f"A la recherche de nouvelles courses à observer sur le programme [{self.programme_date}]...")
             self._start_workers_for_races_not_observed()
@@ -75,6 +76,7 @@ class SuperWorker(threading.Thread):
         info(f"Les fichiers csv temporaires des côtes ont été supprimés pour le programme [{self.programme_date}]")
         self._retrieve_race_results()
         info(f"Les résultats des courses pour le programme [{self.programme_date}] ont été récupérées et ajoutées au fichier {self.file_path}.")
+        self.status = "sleeping"
 
 
     def _stop_workers(self):
@@ -132,4 +134,3 @@ class SuperWorker(threading.Thread):
         if all_data:
             merged_df = pd.concat(all_data, ignore_index=True)
             merged_df.to_csv(merged_file_path, index=False)
-            
