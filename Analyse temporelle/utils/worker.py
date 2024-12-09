@@ -53,7 +53,7 @@ class Worker(threading.Thread):
                 if self._is_course_over():
                     info(f"La course {self.programme_date}_R{self.reunion_num}_C{self.course_num} est terminée.")
                     break
-            time.sleep(60)
+            time.sleep(20)
         
         self.status = "sleeping" 
         info(f"Worker {self.programme_date}_R{self.reunion_num}_C{self.course_num} est au status [{self.status}].")
