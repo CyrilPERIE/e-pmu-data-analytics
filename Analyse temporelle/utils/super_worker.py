@@ -19,6 +19,7 @@ class SuperWorker(threading.Thread):
         info(f"Lancement du SuperWorker pour le programme [{programme_date}]")
         self.programme_date = programme_date
         self.workers = []
+        self.followed_races = []
 
         self.file_path = os.path.join(path, f"{self.programme_date}_results.csv")
         self.header = [
@@ -44,7 +45,7 @@ class SuperWorker(threading.Thread):
 
 
     def _all_workers_sleeping(self):
-
+        info(f"[{self.programme_date}] {[i.status for i in self.workers].count("running")}/{len(self.workers)} en cours.")
         return all(i.status == "sleeping" for i in self.workers)
 
 
@@ -56,19 +57,29 @@ class SuperWorker(threading.Thread):
             reunion_num = reunion["numExterne"]
             courses = reunion["courses"]
             for course in courses:
+                course_num = course["numExterne"]
                 if "isArriveeDefinitive" in course and course["isArriveeDefinitive"] == "true":
                     pass
-                self._add_worker(reunion_num, course)
+                if (reunion_num, course_num) not in self.followed_races:
+                    self._add_worker(reunion_num, course)
+                    self.followed_races.append((reunion_num, course_num))
 
 
     def _stop(self):
 
+        self._stop_workers()
+        info(f"Les workers ont été arrêtés pour le programme [{self.programme_date}]")
         self._merge_csv_files()
         info(f"Les fichiers csv des côtes ont été fusionnés pour le programme [{self.programme_date}]")
-        self._delete_workers_files()
+        # self._delete_workers_files()
         info(f"Les fichiers csv temporaires des côtes ont été supprimés pour le programme [{self.programme_date}]")
         self._retrieve_race_results()
         info(f"Les résultats des courses pour le programme [{self.programme_date}] ont été récupérées et ajoutées au fichier {self.file_path}.")
+
+
+    def _stop_workers(self):
+        for worker in self.workers:
+            worker.join()
 
 
     def _retrieve_race_results(self):

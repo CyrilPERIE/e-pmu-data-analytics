@@ -2,7 +2,7 @@ import os
 import csv
 import threading
 import pandas as pd
-from .api import get_participants
+from .api import get_participants, get_course
 import time
 from .log import info
 
@@ -50,7 +50,7 @@ class Worker(threading.Thread):
                 data, dateRapport = self._extract_useful_datas(participants)
                 if self._is_new_datas(dateRapport) and data:
                     self._write_data(data)
-                if self._is_course_over(participants):
+                if self._is_course_over():
                     info(f"La course {self.programme_date}_R{self.reunion_num}_C{self.course_num} est terminée.")
                     break
             time.sleep(60)
@@ -59,8 +59,9 @@ class Worker(threading.Thread):
         info(f"Worker {self.programme_date}_R{self.reunion_num}_C{self.course_num} est au status [{self.status}].")
 
     
-    def _is_course_over(self, participants):
-        return "commentaireApresCourse" in participants["participants"][0]
+    def _is_course_over(self):
+        course = get_course(self.programme_date, self.reunion_num, self.course_num)
+        return "isArriveeDefinitive" in course and course["isArriveeDefinitive"]
 
     
     def _create_file_if_not_exist(self):
