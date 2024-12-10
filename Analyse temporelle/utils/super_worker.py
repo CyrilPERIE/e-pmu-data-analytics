@@ -72,7 +72,7 @@ class SuperWorker(threading.Thread):
         info(f"Les workers ont été arrêtés pour le programme [{self.programme_date}]")
         self._merge_csv_files()
         info(f"Les fichiers csv des côtes ont été fusionnés pour le programme [{self.programme_date}]")
-        # self._delete_workers_files()
+        self._delete_workers_files()
         info(f"Les fichiers csv temporaires des côtes ont été supprimés pour le programme [{self.programme_date}]")
         self._retrieve_race_results()
         info(f"Les résultats des courses pour le programme [{self.programme_date}] ont été récupérées et ajoutées au fichier {self.file_path}.")
