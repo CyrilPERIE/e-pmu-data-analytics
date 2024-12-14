@@ -10,6 +10,7 @@ from httpx import AsyncClient
 BASE_URL = "https://online.turfinfo.api.pmu.fr/rest/client/61/programme"
 SUFFIX = "?specialisation=INTERNET"
 COMBINATION_JOIN = "-"
+DATA_FOLDER = "async_scraping/data"
 
 
 def sub_dict(d: dict[str, Any], sub_keys: list[str]) -> dict[str, Any]:
@@ -89,7 +90,7 @@ async def fetch_finished_race(
     return get_race_key(race_input), race_output
 
 
-async def scrap_day(_date: date, data_folder: str = "scraping/data") -> None:
+async def scrap_day(_date: date, data_folder: str = DATA_FOLDER) -> None:
     program_url = f"{BASE_URL}/{_date.strftime('%d%m%Y')}"
 
     # Fetch the program of the day
@@ -99,7 +100,7 @@ async def scrap_day(_date: date, data_folder: str = "scraping/data") -> None:
         races = [race for meeting in meetings for race in meeting["courses"]]
 
     # Init data or load current version
-    filepath = os.path.join(data_folder, date.today().strftime("%d_%m_%Y") + ".json")
+    filepath = os.path.join(data_folder, _date.strftime("%d_%m_%Y") + ".json")
     if os.path.exists(filepath):
         with open(filepath, "r+") as f:
             data = json.load(f)
@@ -123,8 +124,7 @@ async def scrap_day(_date: date, data_folder: str = "scraping/data") -> None:
         ]
         meeting_metadata = ["nature", "hippodrome", "meteo"]
         data = {
-            f"R{race['numReunion']}C{race['numOrdre']}": sub_dict(race, race_metadata)
-            | sub_dict(meeting, meeting_metadata)
+            get_race_key(race): (sub_dict(race, race_metadata) | sub_dict(meeting, meeting_metadata))
             for meeting in meetings
             for race in meeting["courses"]
         }
@@ -143,7 +143,11 @@ async def scrap_day(_date: date, data_folder: str = "scraping/data") -> None:
             *[
                 fetch_finished_race(client, program_url, race, data[get_race_key(race)])
                 for race in races
-                if race.get("rapportsDefinitifsDisponibles", False) and ("ordreArrivee" not in data[get_race_key(race)])
+                if (
+                    race.get("rapportsDefinitifsDisponibles", False)
+                    and ("ordreArrivee" not in data[get_race_key(race)])
+                    and ("ordreArrivee" in race)
+                )
             ]
         )
 
@@ -159,5 +163,6 @@ if __name__ == "__main__":
     try:
         run(scrap_day(date.today()))
     except Exception as e:
-        with open("scraping/data/" + date.today().strftime("%d_%m_%Y") + ".txt", "a+") as f:
+        print(e)
+        with open(DATA_FOLDER + date.today().strftime("%d_%m_%Y") + ".txt", "a+") as f:
             f.write(f"{datetime.now().strftime('%H:%M %Ss')} - {e}\n")
