@@ -1,1 +1,8 @@
 httpx
+matplotlib
+numpy
+pandas
+scikit-learn
+seaborn
+joblib
+tqdm

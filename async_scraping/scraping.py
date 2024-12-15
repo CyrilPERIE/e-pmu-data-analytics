@@ -10,7 +10,7 @@ from httpx import AsyncClient
 BASE_URL = "https://online.turfinfo.api.pmu.fr/rest/client/61/programme"
 SUFFIX = "?specialisation=INTERNET"
 COMBINATION_JOIN = "-"
-DATA_FOLDER = "async_scraping/data"
+DATA_FOLDER = "data"
 
 
 def sub_dict(d: dict[str, Any], sub_keys: list[str]) -> dict[str, Any]:
@@ -135,7 +135,7 @@ async def scrap_day(_date: date, data_folder: str = DATA_FOLDER) -> None:
             *[
                 fetch_planned_race(client, program_url, race, data[get_race_key(race)])
                 for race in races
-                if race["categorieStatut"] == "A_PARTIR"
+                # if race["categorieStatut"] == "A_PARTIR"
             ]
         )
 
