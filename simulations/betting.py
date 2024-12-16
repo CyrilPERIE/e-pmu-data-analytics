@@ -13,11 +13,11 @@ from tqdm import tqdm
 root_dir = str(Path(__file__).parent.parent)
 sys.path.append(root_dir)
 
-from model.prepare_data import extract_features, get_all_feature_names
+from epmu.model.prepare import extract_features, get_all_feature_names
 
 DATA_DIR = Path("data/2023")
 K_PARTICIPANTS = 6
-MODEL_DIR = Path("model/saved_models")
+MODEL_DIR = Path("epmu/model/saved_models")
 
 def load_model_and_scaler():
     """Load the trained model and scaler."""
@@ -103,6 +103,8 @@ def simulate_betting():
     
     # Dictionary to store results for different thresholds
     threshold_results = {
+        0.4: {"profit": 0, "total_bet": 0, "bets_made": 0, "results": []},
+        0.45: {"profit": 0, "total_bet": 0, "bets_made": 0, "results": []},
         0.5: {"profit": 0, "total_bet": 0, "bets_made": 0, "results": []},
         0.55: {"profit": 0, "total_bet": 0, "bets_made": 0, "results": []},
         0.6: {"profit": 0, "total_bet": 0, "bets_made": 0, "results": []},
@@ -308,9 +310,18 @@ def plot_results(favorite_results, random_results, k_strat_results,
     # Adjust layout to prevent label cutoff
     plt.tight_layout()
     
+    # Create images directory if it doesn't exist
+    os.makedirs("images", exist_ok=True)
+    
+    # Generate timestamp and filename
+    timestamp = datetime.now().strftime("%Y_%m_%d_%Hh%Mm%Ss")
+    filename = f"betting_simulation_results_{timestamp}.png"
+    
     # Save the plot
-    plt.savefig("simulations/betting_simulation_results.png", bbox_inches='tight')
+    plt.savefig(f"images/{filename}", bbox_inches='tight')
     plt.close()
+    
+    print(f"\nPlot saved as: images/{filename}")
 
 if __name__ == "__main__":
     results = simulate_betting()

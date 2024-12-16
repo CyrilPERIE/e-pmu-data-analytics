@@ -6,7 +6,7 @@ from pathlib import Path
 
 def load_data():
     """Load the prepared dataset."""
-    data_dir = Path("model/data")
+    data_dir = Path("epmu/model/data")
     X = pd.read_csv(data_dir / "features.csv")
     y = pd.read_csv(data_dir / "targets.csv").iloc[:, 0]  # Get first column
     return X, y
@@ -54,7 +54,7 @@ def plot_correlations(correlations: pd.Series, top_n: int = 20):
     
     # Adjust layout and save
     plt.tight_layout()
-    plt.savefig("model/correlation_analysis.png")
+    plt.savefig("images/correlation_analysis.png")
     plt.close()
 
 def analyze_correlations(top_n: int = 20):
@@ -74,7 +74,7 @@ def analyze_correlations(top_n: int = 20):
     print("\nPlotting correlations...")
     plot_correlations(correlations, top_n)
     
-    print("\nAnalysis complete! Check 'model/correlation_analysis.png' for visualization.")
+    print("\nAnalysis complete! Check 'images/correlation_analysis.png' for visualization.")
 
 if __name__ == "__main__":
-    analyze_correlations() 
+    analyze_correlations()

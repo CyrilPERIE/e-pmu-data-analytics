@@ -12,7 +12,7 @@ import os
 
 def load_data():
     """Load the prepared dataset."""
-    data_dir = Path("model/data")
+    data_dir = Path("epmu/model/data")
     X = pd.read_csv(data_dir / "features.csv")
     y = pd.read_csv(data_dir / "targets.csv").iloc[:, 0]
     return X, y
@@ -29,7 +29,7 @@ def plot_feature_importance(model, feature_names, top_n=20):
     plt.ylabel('Importance')
     plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
-    plt.savefig("model/feature_importance.png")
+    plt.savefig("images/feature_importance.png")
     plt.close()
 
 def plot_confusion_matrix(y_true, y_pred):
@@ -41,7 +41,7 @@ def plot_confusion_matrix(y_true, y_pred):
     plt.ylabel('True Label')
     plt.xlabel('Predicted Label')
     plt.tight_layout()
-    plt.savefig("model/confusion_matrix.png")
+    plt.savefig("images/confusion_matrix.png")
     plt.close()
 
 def train_model():
@@ -102,9 +102,9 @@ def train_model():
     
     # Save model and scaler
     print("\nSaving model and scaler...")
-    os.makedirs("model/saved_models", exist_ok=True)
-    joblib.dump(model, "model/saved_models/random_forest.joblib")
-    joblib.dump(scaler, "model/saved_models/scaler.joblib")
+    os.makedirs("epmu/model/saved_models", exist_ok=True)
+    joblib.dump(model, "epmu/model/saved_models/random_forest.joblib")
+    joblib.dump(scaler, "epmu/model/saved_models/scaler.joblib")
     
     return model, scaler
 

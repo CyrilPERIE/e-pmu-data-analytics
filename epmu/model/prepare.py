@@ -5,8 +5,18 @@ import pandas as pd
 from pathlib import Path
 from typing import Dict, Any, List, Tuple
 from datetime import datetime
+from scipy.stats import skew
+import joblib
 
 DATA_DIR = Path("data/2024")
+
+# Load category statistics
+try:
+    CATEGORY_STATS = joblib.load("epmu/model/data/category_stats.joblib")
+    HIPPODROME_RACE_COUNTS = joblib.load("epmu/model/data/hippodrome_race_counts.joblib")
+except:
+    CATEGORY_STATS = None
+    HIPPODROME_RACE_COUNTS = None
 
 # Predefined categories for one-hot encoding
 CATEGORIES = {
@@ -98,6 +108,8 @@ def get_all_feature_names() -> List[str]:
         "std_betting_amount",
         "top_bet_ratio",
         "top_2_bet_ratio",
+        # Hippodrome race count
+        "hippodrome_race_count",
     ]
     
     # Add categorical features
@@ -147,6 +159,22 @@ def extract_time_features(timestamp: int) -> Dict[str, float]:
         "is_afternoon": 1 if dt.hour >= 12 else 0
     }
 
+def odds_to_probability(odds: float) -> float:
+    """Convert odds to probability."""
+    return 1 / odds if odds > 0 else 0
+
+def get_betting_amounts(race_data: Dict[str, Any]) -> List[float]:
+    """Get list of betting amounts."""
+    amounts = []
+    if "enjeux" in race_data:
+        simple_gagnant = race_data["enjeux"].get("E_SIMPLE_GAGNANT", {})
+        if simple_gagnant:
+            for horse_bets in simple_gagnant.values():
+                if horse_bets:
+                    latest_timestamp = max(horse_bets.keys())
+                    amounts.append(horse_bets[latest_timestamp])
+    return amounts
+
 def extract_features(race_data: Dict[str, Any]) -> Dict[str, float]:
     """Extract relevant features from a race."""
     features = {}
@@ -176,32 +204,49 @@ def extract_features(race_data: Dict[str, Any]) -> Dict[str, float]:
     features["temperature"] = meteo.get("temperature", 0)
     features["wind_force"] = meteo.get("forceVent", 0)
     
-    # Boolean features
-    features["is_grand_prix"] = 1 if race_data.get("grandPrixNationalTrot", False) else 0
-    
-    # Categorical features (one-hot encoded with predefined categories)
-    for feature_name, categories in CATEGORIES.items():
-        if feature_name == "nebulosite":
-            value = meteo.get("nebulositeCode", "UNKNOWN")
-        else:
-            value = race_data.get(feature_name, "UNKNOWN")
+    # Category statistics features
+    if CATEGORY_STATS:
+        hippodrome = race_data.get("hippodrome", {}).get("libelleCourt", "UNKNOWN")
+        discipline = race_data.get("discipline", "UNKNOWN")
+        specialite = race_data.get("specialite", "UNKNOWN")
         
-        # Create binary features for each possible category
-        for category in categories:
-            features[f"{feature_name}_{category}"] = 1 if value == category else 0
-
+        features["hippodrome_win_rate"] = CATEGORY_STATS["hippodrome"].get(hippodrome, 0.5)
+        features["discipline_win_rate"] = CATEGORY_STATS["discipline"].get(discipline, 0.5)
+        features["specialite_win_rate"] = CATEGORY_STATS["specialite"].get(specialite, 0.5)
+        
+        # Add hippodrome race count
+        if HIPPODROME_RACE_COUNTS:
+            features["hippodrome_race_count"] = HIPPODROME_RACE_COUNTS.get(hippodrome, 0)
+    
     # Odds-related features
     sorted_odds = get_sorted_odds(race_data)
     if len(sorted_odds) >= 2:
-        features["favorite_second_diff"] = sorted_odds[1] - sorted_odds[0]  # Difference between top 2
+        features["favorite_second_diff"] = sorted_odds[1] - sorted_odds[0]
         features["favorite_second_ratio"] = sorted_odds[1] / sorted_odds[0] if sorted_odds[0] != 0 else 0
         features["favorite_mean_ratio"] = sorted_odds[0] / np.mean(sorted_odds) if np.mean(sorted_odds) != 0 else 0
         features["top_3_std"] = np.std(sorted_odds[:3]) if len(sorted_odds) >= 3 else 0
+        features["odds_skewness"] = skew(sorted_odds) if len(sorted_odds) >= 3 else 0
+        
+        # Convert odds to probabilities and compute probability-based features
+        probabilities = [odds_to_probability(odds) for odds in sorted_odds]
+        features["prob_skewness"] = skew(probabilities) if len(probabilities) >= 3 else 0
+        features["prob_std"] = np.std(probabilities)
+        features["prob_range"] = max(probabilities) - min(probabilities)
+        features["prob_favorite_second_diff"] = probabilities[0] - probabilities[1]
+        features["prob_favorite_second_ratio"] = probabilities[0] / probabilities[1] if probabilities[1] > 0 else 0
+        features["prob_favorite_mean_ratio"] = probabilities[0] / np.mean(probabilities) if np.mean(probabilities) > 0 else 0
     else:
         features["favorite_second_diff"] = 0
         features["favorite_second_ratio"] = 0
         features["favorite_mean_ratio"] = 0
         features["top_3_std"] = 0
+        features["odds_skewness"] = 0
+        features["prob_skewness"] = 0
+        features["prob_std"] = 0
+        features["prob_range"] = 0
+        features["prob_favorite_second_diff"] = 0
+        features["prob_favorite_second_ratio"] = 0
+        features["prob_favorite_mean_ratio"] = 0
     
     if "rapports" in race_data:
         odds_list = []
@@ -224,38 +269,31 @@ def extract_features(race_data: Dict[str, Any]) -> Dict[str, float]:
             features["odds_range"] = 0
     
     # Betting amounts features
-    if "enjeux" in race_data:
-        simple_gagnant = race_data["enjeux"].get("E_SIMPLE_GAGNANT", {})
-        if simple_gagnant:
-            # Get latest betting amounts
-            latest_amounts = []
-            for horse_bets in simple_gagnant.values():
-                if horse_bets:
-                    latest_timestamp = max(horse_bets.keys())
-                    latest_amounts.append(horse_bets[latest_timestamp])
-            
-            if latest_amounts:
-                features["total_betting_amount"] = sum(latest_amounts)
-                features["max_betting_amount"] = max(latest_amounts)
-                features["min_betting_amount"] = min(latest_amounts)
-                features["mean_betting_amount"] = np.mean(latest_amounts)
-                features["std_betting_amount"] = np.std(latest_amounts)
-                
-                # Add betting concentration features
-                sorted_amounts = sorted(latest_amounts, reverse=True)
-                features["top_bet_ratio"] = sorted_amounts[0] / sum(latest_amounts) if sum(latest_amounts) != 0 else 0
-                if len(sorted_amounts) >= 2:
-                    features["top_2_bet_ratio"] = sum(sorted_amounts[:2]) / sum(latest_amounts) if sum(latest_amounts) != 0 else 0
-                else:
-                    features["top_2_bet_ratio"] = 0
+    betting_amounts = get_betting_amounts(race_data)
+    if betting_amounts:
+        features["total_betting_amount"] = sum(betting_amounts)
+        features["max_betting_amount"] = max(betting_amounts)
+        features["min_betting_amount"] = min(betting_amounts)
+        features["mean_betting_amount"] = np.mean(betting_amounts)
+        features["std_betting_amount"] = np.std(betting_amounts)
+        features["betting_skewness"] = skew(betting_amounts) if len(betting_amounts) >= 3 else 0
+        
+        # Add betting concentration features
+        sorted_amounts = sorted(betting_amounts, reverse=True)
+        features["top_bet_ratio"] = sorted_amounts[0] / sum(betting_amounts) if sum(betting_amounts) != 0 else 0
+        if len(sorted_amounts) >= 2:
+            features["top_2_bet_ratio"] = sum(sorted_amounts[:2]) / sum(betting_amounts) if sum(betting_amounts) != 0 else 0
         else:
-            features["total_betting_amount"] = 0
-            features["max_betting_amount"] = 0
-            features["min_betting_amount"] = 0
-            features["mean_betting_amount"] = 0
-            features["std_betting_amount"] = 0
-            features["top_bet_ratio"] = 0
             features["top_2_bet_ratio"] = 0
+    else:
+        features["total_betting_amount"] = 0
+        features["max_betting_amount"] = 0
+        features["min_betting_amount"] = 0
+        features["mean_betting_amount"] = 0
+        features["std_betting_amount"] = 0
+        features["betting_skewness"] = 0
+        features["top_bet_ratio"] = 0
+        features["top_2_bet_ratio"] = 0
 
     # Ensure all features are present in the correct order
     all_features = {name: features.get(name, 0) for name in get_all_feature_names()}
@@ -302,9 +340,9 @@ def prepare_dataset() -> Tuple[pd.DataFrame, pd.Series]:
     X = X.fillna(0)
     
     # Save the processed data
-    os.makedirs("model/data", exist_ok=True)
-    X.to_csv("model/data/features.csv", index=False)
-    y.to_csv("model/data/targets.csv", index=False)
+    os.makedirs("epmu/model/data", exist_ok=True)
+    X.to_csv("epmu/model/data/features.csv", index=False)
+    y.to_csv("epmu/model/data/targets.csv", index=False)
     
     print(f"Dataset prepared:")
     print(f"Number of samples: {len(y)}")
