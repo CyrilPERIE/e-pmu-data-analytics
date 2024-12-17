@@ -1,0 +1,463 @@
+So in the async_scraping/data folder you have a json file for each day.
+Each day is a map from a race key to a race object.
+Here is an example of such a json with only one race:
+```json
+{
+  "R1C1": {
+    "heureDepart": 1704111900000,
+    "montantPrix": 33000,
+    "distance": 2200,
+    "discipline": "MONTE",
+    "specialite": "TROT_MONTE",
+    "nombreDeclaresPartants": 13,
+    "conditionSexe": "MALES_ET_HONGRES",
+    "grandPrixNationalTrot": false,
+    "montantOffert1er": 14850,
+    "montantOffert2eme": 8250,
+    "montantOffert3eme": 4620,
+    "nature": "DIURNE",
+    "hippodrome": {
+      "code": "VIN",
+      "libelleCourt": "VINCENNES",
+      "libelleLong": "HIPPODROME DE PARIS-VINCENNES"
+    },
+    "meteo": {
+      "datePrevision": 1704095100000,
+      "nebulositeCode": "P6",
+      "nebulositeLibelleCourt": "Couvert",
+      "nebulositeLibelleLong": "Le ciel sera couvert mais il ne devrait pas pleuvoir.",
+      "temperature": 9,
+      "forceVent": 18,
+      "directionVent": "SO"
+    },
+    "rapports": {
+      "1": {
+        "1704112056000": 24.0
+      },
+      "2": {
+        "1704112056000": 96.0
+      },
+      "4": {
+        "1704112056000": 60.0
+      },
+      "5": {
+        "1704112056000": 21.0
+      },
+      "6": {
+        "1704112056000": 22.0
+      },
+      "7": {
+        "1704112056000": 11.0
+      },
+      "8": {
+        "1704112056000": 9.2
+      },
+      "9": {
+        "1704112056000": 15.0
+      },
+      "10": {
+        "1704112056000": 5.8
+      },
+      "11": {
+        "1704112056000": 23.0
+      },
+      "12": {
+        "1704112056000": 2.3
+      },
+      "13": {
+        "1704112056000": 10.0
+      }
+    },
+    "enjeux": {
+      "E_SIMPLE_GAGNANT": {
+        "12": {
+          "1704112056000": 1230000
+        },
+        "10": {
+          "1704112056000": 489300
+        },
+        "8": {
+          "1704112056000": 309300
+        },
+        "13": {
+          "1704112056000": 278200
+        },
+        "7": {
+          "1704112056000": 244100
+        },
+        "9": {
+          "1704112056000": 182200
+        },
+        "5": {
+          "1704112056000": 133100
+        },
+        "6": {
+          "1704112056000": 126100
+        },
+        "11": {
+          "1704112056000": 122600
+        },
+        "1": {
+          "1704112056000": 114000
+        },
+        "4": {
+          "1704112056000": 47300
+        },
+        "2": {
+          "1704112056000": 29500
+        }
+      },
+      "E_SIMPLE_PLACE": {
+        "12": {
+          "1704112056000": 863300
+        },
+        "10": {
+          "1704112056000": 455900
+        },
+        "8": {
+          "1704112056000": 344100
+        },
+        "7": {
+          "1704112056000": 294100
+        },
+        "13": {
+          "1704112056000": 236800
+        },
+        "9": {
+          "1704112056000": 210100
+        },
+        "11": {
+          "1704112056000": 156400
+        },
+        "6": {
+          "1704112056000": 149800
+        },
+        "5": {
+          "1704112056000": 141800
+        },
+        "1": {
+          "1704112056000": 102100
+        },
+        "4": {
+          "1704112056000": 65400
+        },
+        "2": {
+          "1704112056000": 40300
+        }
+      },
+      "E_COUPLE_GAGNANT": {
+        "10-12": {
+          "1704112056000": 121800
+        },
+        "7-12": {
+          "1704112056000": 97700
+        },
+        "8-12": {
+          "1704112056000": 79400
+        },
+        "9-12": {
+          "1704112056000": 59100
+        },
+        "12-13": {
+          "1704112056000": 57700
+        },
+        "6-12": {
+          "1704112056000": 41200
+        },
+        "5-12": {
+          "1704112056000": 40800
+        },
+        "7-10": {
+          "1704112056000": 37800
+        },
+        "8-10": {
+          "1704112056000": 34200
+        },
+        "9-10": {
+          "1704112056000": 30300
+        },
+        "10-13": {
+          "1704112056000": 29000
+        },
+        "7-8": {
+          "1704112056000": 28700
+        }
+      },
+      "E_COUPLE_PLACE": {
+        "10-12": {
+          "1704112056000": 152300
+        },
+        "7-12": {
+          "1704112056000": 126900
+        },
+        "8-12": {
+          "1704112056000": 86300
+        },
+        "9-12": {
+          "1704112056000": 67900
+        },
+        "12-13": {
+          "1704112056000": 61300
+        },
+        "7-10": {
+          "1704112056000": 55100
+        },
+        "6-12": {
+          "1704112056000": 54700
+        },
+        "5-12": {
+          "1704112056000": 51200
+        },
+        "8-10": {
+          "1704112056000": 49000
+        },
+        "11-12": {
+          "1704112056000": 44300
+        },
+        "9-10": {
+          "1704112056000": 43400
+        },
+        "7-9": {
+          "1704112056000": 41600
+        }
+      },
+      "E_DEUX_SUR_QUATRE": {
+        "10-12": {
+          "1704112056000": 159525
+        },
+        "7-12": {
+          "1704112056000": 134900
+        },
+        "8-12": {
+          "1704112056000": 47850
+        },
+        "5-12": {
+          "1704112056000": 47750
+        },
+        "9-12": {
+          "1704112056000": 42500
+        },
+        "12-13": {
+          "1704112056000": 41000
+        },
+        "7-10": {
+          "1704112056000": 35800
+        },
+        "6-12": {
+          "1704112056000": 29825
+        },
+        "10-13": {
+          "1704112056000": 27850
+        },
+        "7-9": {
+          "1704112056000": 25100
+        },
+        "8-10": {
+          "1704112056000": 22500
+        },
+        "7-13": {
+          "1704112056000": 21025
+        }
+      },
+      "E_TRIO": {
+        "7-10-12": {
+          "1704112056000": 37400
+        },
+        "10-12-13": {
+          "1704112056000": 27700
+        },
+        "8-10-12": {
+          "1704112056000": 23300
+        },
+        "9-10-12": {
+          "1704112056000": 19400
+        },
+        "6-10-12": {
+          "1704112056000": 16200
+        },
+        "7-8-12": {
+          "1704112056000": 14600
+        },
+        "5-7-12": {
+          "1704112056000": 14400
+        },
+        "7-9-12": {
+          "1704112056000": 14100
+        },
+        "7-12-13": {
+          "1704112056000": 13200
+        },
+        "8-9-12": {
+          "1704112056000": 13000
+        },
+        "5-10-12": {
+          "1704112056000": 12300
+        },
+        "8-12-13": {
+          "1704112056000": 11900
+        }
+      }
+    },
+    "ordreArrivee": [
+      [
+        10
+      ],
+      [
+        6
+      ],
+      [
+        9
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        11
+      ]
+    ],
+    "rapportsDefinitifs": {
+      "E_SIMPLE_GAGNANT": {
+        "10": 5.8
+      },
+      "E_SIMPLE_PLACE": {
+        "10": 2.3,
+        "6": 5.0,
+        "9": 3.8
+      },
+      "E_COUPLE_GAGNANT": {
+        "10-6": 45.6,
+        "10-NP": 0.0
+      },
+      "E_COUPLE_PLACE": {
+        "10-6": 14.2,
+        "10-9": 10.9,
+        "6-9": 17.3,
+        "10-NP": 0.0,
+        "6-NP": 0.0,
+        "9-NP": 0.0
+      },
+      "E_DEUX_SUR_QUATRE": {
+        "10-6": 5.7,
+        "10-9": 5.7,
+        "10-7": 5.7,
+        "6-9": 5.7,
+        "6-7": 5.7,
+        "9-7": 5.7,
+        "10-NP": 0.0,
+        "6-NP": 0.0,
+        "9-NP": 0.0,
+        "7-NP": 0.0
+      },
+      "E_TRIO": {
+        "10-6-9": 161.7
+      },
+      "E_MINI_MULTI": {
+        "10-6-9-7": 9.6
+      }
+    }
+  }
+}
+```
+Now your goal is to create a python script in the simulations/ folder that will load the data for each day and create a simulation
+of how much we would win if we bet 1 euro on all the races of all days. We always bet on the horse
+with the highest probability to win.
+The data in the json are written in the format of the PMU API, which is in french.
+At the end, I expect to have a simple curve of the evolution of the amount of money we would win if we bet 1 euro on all the races of all days.
+
+---
+
+Ok perfect, now I would like to add a curve with a random strategy : we bet 1 euro on a random horse for each race.
+
+---
+
+Thank you! Now I would like to add a curve for the following strategy :
+For each race, if it has strictly more than k=8 partcipants we do not bet on it.
+If it has less than k participants we bet (1 / <proportion of races with less than k participants>) euro on it.
+The idea is to bet approximately the same amount of money than for the other strategies.
+
+---
+
+Ok this is not bad. I guess you start to see what I am trying to do : I try to come with a way
+to determine if a race is worth betting on or not, or in other word if a race is somehow predictable.
+So my goal from now would be to create a model able, being given a race, to predict whether or not
+the horse with the highest probability to win will win. This is a basic binary classification problem.
+Then this model will tell me for each race whether I should bet on it or not.
+So first, I would like to process my input data in order to extract features from it (X) and the
+target (y between 0 and 1) which is whether the winner of the race was the horse with the highest probability to win.
+We will do that in the model folder.
+
+---
+
+1. I think features like "heureDepart", "discipline", "specialite", "conditionSexe", "grandPrixNationalTrot", "nature", "nebulositeCode"
+might be useful as well. The intuition is that the time of the day for instance might influence the predictability of the race.
+So we should add these features. Concerning the strings values, they should be converted to numbers, maybe
+using one hot encoding, what do you think is the best way to do that ?
+We should also be creative and craft relevant features, for instance the difference between the highest and second highest odds.
+Because if the difference is small, it means that the race is not very predictable, etc... We could also
+add the relative difference between "montantOffert1er" and "montantOffert2eme", I think this might be useful because
+if the difference is small, then being second is just fine, and the riders wont be very motivated to win. Try to be creative.
+
+2. Besides the prepare_data.py file, I would like to create a training.py file where I will implement my binary classification model and train it.
+
+3. Additionally, I would also appreciate a correlation.py file where I will implement a function able to compute the correlation
+between the features and the target. This will help me understand which features are the most predictive.
+
+---
+
+Excellent ! Now I have changed the data folder to 2023 in the betting_simulation.py file.
+What I want from now is to test the following strategies based on what we just did :
+for each race, run the model and if it predicts 1, bet 3 euros on the horse with the highest probability to win.
+An other strategy I would like to test is to bet 2 euros times the probability output of the model on every race.
+My goal is to see if I can improve the precedent strategies with my model.
+
+---
+
+Ok this is not bad, I spotted several things that could be improved:
+- first the script betting_simulation is a bit slow, it takes 3 minutes to run, but it is not too bad.
+- then I would like to know for each strategy the total amount of money we bet.
+- then I have this error : "/Users/clementpiat/Code/venvs/e-pmu/lib/python3.11/site-packages/sklearn/utils/validation.py:2739: UserWarning: X does not have valid feature names, but StandardScaler was fitted with feature names
+  warnings.warn("
+- then, the k<=6 strategy is not working, the bet multiplier is 0.
+
+---
+
+Ok so it appears the model-based strategy which bet 7€ if the model predicts 1 is not bad,
+but I would like to improve it, because according to the simulation, the ROI is still negative.
+I woudld like to try different tresholds now, for instance only bet if the probability is higher than k,
+k being 0.5, 0.6, 0.7, 0.8, 0.9. Also one important thing is that I would like to bet the amount of money
+which is such that "Total amount bet = Total amount bet for the other strategies".
+
+---
+
+Ok this is not bad ! My best ROI is -6% now. Let's do a little bit of brain storming.
+How do you think we could improve our model ? We can think very broadly and out of the box.
+We must just keep in mind the final goal : finding a strategy with a positive ROI. So it could be by
+improving the model, by crafting creative and meaningful features, but It could also be by
+finding a better betting strategy based on the model, or building a model with a totally different task
+(not predicting whether the horse with the highest probability to win will win), or anything else.
+
+---
+
+Ok let's get back to work. First let's work on the feature engineering part. Based on the brain storming here is my conclusion :
+- I would like to add the skewness of the odds and the skewness of the bettings amounts
+- I would like to convert the odds to probabilities and then compute the same metrics as for odds but for probabilities
+- I would like to build a separate script which maps "hippodrome", "discipline", and "specialite", to the mean value of the target (so for each "hippodrome" we compute the mean value of the target in this "hippodrome"). Then I will add this value as a feature.
+
+---
+
+Great, I think about something else: let's add the number of races per hippodrome as a feature.
+
+---
+
+This is great ! Current ROI in 2023 is -2%, we are close to positive ROI !
+Ok now let's focus on the model improvement. Come up with a strategy to try out different models and different
+feature selection methods (because I know for sure that some features are not predictive) so that we can find the best model
+for our task of predicting whether the horse with the highest probability to win will win.
+We will focus on this task metrics and then we will take the best model (which can be an ensemble of models),
+to the betting simulation.
+It's is important here that I have a clear view on the different models performance so that
+I can choose conscientely the best model. Let's do that !
+
