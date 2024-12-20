@@ -461,3 +461,56 @@ to the betting simulation.
 It's is important here that I have a clear view on the different models performance so that
 I can choose conscientely the best model. Let's do that !
 
+---
+
+I feel that the better metrics for our task would be the precision and the F1-score.
+My reasoning is the following : predicting a target to be 1, means that we bet on the race, and
+so it is important to be true in that case.
+Challenge this idea. What do you think ? And how does that change the optimize strategy ?
+
+---
+
+1. Ok, let's build a custom scoring metric that reflects expected profit. We will use this metric
+in the optimize.py script in order to sort and choose the proper model.
+
+2. Then I want the number of selected features to use a constant K. K=30 looks better than K=20 for me.
+
+---
+
+I want to modify the optimize.py script, I feel that the feature selector part is useless.
+Just remove it and use all the featrues always.
+
+---
+
+Ok it appears model optimization didn't make a significant improvement.
+It seems that the value of the model is driven by the initial features and that any model is able to
+capture the relation between those features and the "predictability" of the race.
+What do you think we could do from now ?
+I feel like reinforcement learning might be a good solution for what we are trying to do.
+Because the model could then at each race decide to bet or not and which amount to bet, and get direct reward.
+It feels like a natural approach ? What do you think ?
+Maybe I could try simpler approach and closer to my current approach.
+
+---
+
+Ok, in betting.py, we are going to replace the basic thresholds approach, with a risk-adjusted betting approach.
+The bet amount is calculated as: max(0, base_bet * (model_confidence * potential_return - risk_factor))
+The risk_factor is a hyperparameter we can tune (it somehow replaces the threshold).
+We can first try risk_factor = 0.5, 0.75, 1.
+The base_bet is such that the total amount bet is the same as for the other strategies.
+If this doesn't sufficiently improve the ROI, we will later implement a reinforcement learning approach.
+Don't do it for now.
+
+---
+
+Mmm this is weird, this approach is so much worse than the thresholds one with a unique betting amount.
+It is so bad that I think there could be an error in the code.
+Could you check it ?
+
+---
+
+Ok this doesn't work, betting more if we have more potential return is a trap.
+Let's go back on the threshold strategy please.
+
+---
+

@@ -36,7 +36,7 @@ setup.sh
 run.sh
 cron.txt
 ruff.toml
-cursor_prompt.txt
+# cursor_prompt.txt
 
 # joblib files
 *.joblib
